@@ -1,17 +1,75 @@
-# Temporal Money Transfer example in TypeScript
+# Temporal Hello World in TypeScript
 
-This is the companion code for the tutorial [Run your first Temporal Application with TypeScript](https://learn.temporal.io/getting_started/typescript/first_program_in_typescript).
+A simple "Hello World" Temporal application with environment-based configuration support for both local development and Temporal Cloud.
 
-### Running this sample:
+## Features
 
-1. Make sure Temporal Server is running locally (see the [quick install guide](https://docs.temporal.io/server/quick-install/)).
-1. `npm install` to install dependencies.
-1. `npm run worker` to start the Worker.
-1. In another shell, `npm run client` to run the Workflow Client.
+- Simple greeting workflow and activity
+- Environment-based configuration for easy Temporal Cloud deployment
+- Support for both mTLS and API Key authentication
+- Comprehensive test suite
+- TypeScript with proper linting and formatting
 
-The Workflow will return:
+## Running Locally
 
+1. **Start Temporal Server**:
+   ```bash
+   temporal server start-dev
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start the Worker** (in one terminal):
+   ```bash
+   npm run worker
+   ```
+
+4. **Run the Client** (in another terminal):
+   ```bash
+   npm run client
+   ```
+
+Expected output:
 ```bash
-Started Workflow workflow-OyIhuWr6X4opgqtYnhxuX with RunID a85055c8-3fce-466e-b4f6-8f66c16614e6
-Transfer complete (transaction IDs: w1328871163, d0590412617)
+Started workflow hello-world-abc123
+Hello, Temporal!
 ```
+
+## Running on Temporal Cloud
+
+Set the following environment variables:
+
+### Using API Key (recommended)
+```bash
+export TEMPORAL_ADDRESS="your-namespace.tmprl.cloud:7233"
+export TEMPORAL_NAMESPACE="your-namespace"
+export TEMPORAL_API_KEY="your-api-key"
+```
+
+### Using mTLS
+```bash
+export TEMPORAL_ADDRESS="your-namespace.tmprl.cloud:7233"
+export TEMPORAL_NAMESPACE="your-namespace"
+export TEMPORAL_TLS_CERT="/path/to/client.crt"
+export TEMPORAL_TLS_KEY="/path/to/client.key"
+```
+
+Then run the worker and client as usual with `npm run worker` and `npm run client`.
+
+## Development
+
+- **Build**: `npm run build`
+- **Test**: `npm test`
+- **Lint**: `npm run lint`
+- **Format**: `npm run format`
+
+## Project Structure
+
+- `src/activities.ts` - Activity implementations
+- `src/workflows.ts` - Workflow definitions  
+- `src/worker.ts` - Worker configuration with environment-based auth
+- `src/client.ts` - Client code with environment-based auth
+- `src/helpers.ts` - Environment configuration utilities
