@@ -1,16 +1,13 @@
 import { TestWorkflowEnvironment } from '@temporalio/testing';
-import { WorkflowFailedError } from '@temporalio/client';
 import { after, before, it } from 'mocha';
 import { Worker } from '@temporalio/worker';
 import assert from 'assert';
 import * as activities from '../activities';
-import { moneyTransfer } from '../workflows';
-import type { PaymentDetails } from '../shared';
+import { example } from '../workflows';
 
-describe('Money Transfer workflow', () => {
+describe('Hello World workflow', () => {
   let testEnv: TestWorkflowEnvironment;
   before(async function () {
-    // this.timeout(_000);
     testEnv = await TestWorkflowEnvironment.createLocal();
   });
 
@@ -18,7 +15,7 @@ describe('Money Transfer workflow', () => {
     await testEnv?.teardown();
   });
 
-  it('successfully withdraws and deposits given existing bank account information', async () => {
+  it('successfully runs hello world workflow', async () => {
     const { client, nativeConnection } = testEnv;
     const taskQueue = 'test';
 
@@ -26,34 +23,21 @@ describe('Money Transfer workflow', () => {
       connection: nativeConnection,
       taskQueue,
       workflowsPath: require.resolve('../workflows'),
-      activities: {
-        withdraw: async () => 'w1234567890',
-        deposit: async () => 'd1234567890',
-      },
+      activities,
     });
 
-    const details: PaymentDetails = {
-      amount: 400,
-      sourceAccount: '85-150',
-      targetAccount: '43-812',
-      referenceId: '12345',
-    };
-
     await worker.runUntil(async () => {
-      const result = await client.workflow.execute(moneyTransfer, {
-        args: [details],
-        workflowId: 'money-transfer-test-workflow',
+      const result = await client.workflow.execute(example, {
+        args: ['World'],
+        workflowId: 'hello-world-test-workflow',
         taskQueue,
       });
 
-      assert.equal(
-        result,
-        'Transfer complete (transaction IDs: w1234567890, d1234567890)'
-      );
+      assert.equal(result, 'Hello, World!');
     });
   });
 
-  it('moneyTransfer deposit fails if the target account number does not exist', async () => {
+  it('successfully runs hello world workflow with different name', async () => {
     const { client, nativeConnection } = testEnv;
     const taskQueue = 'test';
 
@@ -64,97 +48,14 @@ describe('Money Transfer workflow', () => {
       activities,
     });
 
-    const invalidDetails: PaymentDetails = {
-      amount: 400,
-      sourceAccount: '85-150',
-      targetAccount: '401-812',
-      referenceId: '12345',
-    };
-
-    let isWorkflowFailedError = false;
-    try {
-      await worker.runUntil(async () => {
-        await client.workflow.execute(moneyTransfer, {
-          args: [invalidDetails],
-          workflowId: 'money-transfer-test-workflow',
-          taskQueue,
-        });
+    await worker.runUntil(async () => {
+      const result = await client.workflow.execute(example, {
+        args: ['Temporal'],
+        workflowId: 'hello-world-test-workflow-2',
+        taskQueue,
       });
-    } catch (err) {
-      if (err instanceof WorkflowFailedError) {
-        isWorkflowFailedError = true;
-      }
-    }
-    assert.equal(isWorkflowFailedError, true);
-  });
 
-  it('moneyTransfer withdrawal fails if the source account number does not exist', async () => {
-    const { client, nativeConnection } = testEnv;
-    const taskQueue = 'test';
-
-    const worker = await Worker.create({
-      connection: nativeConnection,
-      taskQueue,
-      workflowsPath: require.resolve('../workflows'),
-      activities,
+      assert.equal(result, 'Hello, Temporal!');
     });
-
-    const invalidDetails: PaymentDetails = {
-      amount: 400,
-      sourceAccount: '801-150',
-      targetAccount: '43-812',
-      referenceId: '12345',
-    };
-
-    let isWorkflowFailedError = false;
-    try {
-      await worker.runUntil(async () => {
-        await client.workflow.execute(moneyTransfer, {
-          args: [invalidDetails],
-          workflowId: 'money-transfer-test-workflow',
-          taskQueue,
-        });
-      });
-    } catch (err) {
-      if (err instanceof WorkflowFailedError) {
-        isWorkflowFailedError = true;
-      }
-    }
-    assert.equal(isWorkflowFailedError, true);
-  });
-
-  it('moneyTransfer withdrawal fails if the amount being withdrawn is greater than the amount that the bank has', async () => {
-    const { client, nativeConnection } = testEnv;
-    const taskQueue = 'test';
-
-    const worker = await Worker.create({
-      connection: nativeConnection,
-      taskQueue,
-      workflowsPath: require.resolve('../workflows'),
-      activities,
-    });
-
-    const invalidDetails: PaymentDetails = {
-      amount: 4000,
-      sourceAccount: '801-150',
-      targetAccount: '43-812',
-      referenceId: '12345',
-    };
-
-    let isWorkflowFailedError = false;
-    try {
-      await worker.runUntil(async () => {
-        await client.workflow.execute(moneyTransfer, {
-          args: [invalidDetails],
-          workflowId: 'money-transfer-test-workflow',
-          taskQueue,
-        });
-      });
-    } catch (err) {
-      if (err instanceof WorkflowFailedError) {
-        isWorkflowFailedError = true;
-      }
-    }
-    assert.equal(isWorkflowFailedError, true);
   });
 });

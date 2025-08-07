@@ -1,14 +1,13 @@
-// @@@SNIPSTART money-transfer-project-template-ts-worker
 import { Worker, NativeConnectionOptions, NativeConnection } from "@temporalio/worker";
 import * as activities from './activities';
-import { namespace, taskQueueName } from './shared';
+import { taskQueueName } from './shared';
 import { getEnv } from './helpers';
 
 async function run() {
   const { address, namespace, clientCert, clientKey, apiKey } = await getEnv();
 
-  let connectionOptions: NativeConnectionOptions = {
-    address: address,
+  const connectionOptions: NativeConnectionOptions = {
+    address,
   };
 
   if (clientCert && clientKey) {
@@ -52,4 +51,3 @@ run().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-// @@@SNIPEND

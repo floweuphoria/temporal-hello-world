@@ -1,17 +1,15 @@
-// @@@SNIPSTART money-transfer-project-template-ts-start-workflow
 import { Connection, ConnectionOptions, WorkflowClient } from '@temporalio/client';
-import { moneyTransfer } from './workflows';
-import type { PaymentDetails } from './shared';
+import { example } from './workflows';
 import { getEnv } from './helpers';
-
-import { namespace, taskQueueName } from './shared';
+import { taskQueueName } from './shared';
+import { nanoid } from 'nanoid';
 
 async function run() {
   const { address, namespace, clientCert, clientKey, apiKey } = await getEnv();
 
 
-  let connectionOptions: ConnectionOptions = {
-    address: address,
+  const connectionOptions: ConnectionOptions = {
+    address,
   };
 
   // Configure mTLS authentication if certificates are provided
@@ -39,26 +37,13 @@ async function run() {
 
   const client = new WorkflowClient({ connection, namespace });
 
-  const details: PaymentDetails = {
-    amount: 400,
-    sourceAccount: '85-150',
-    targetAccount: '43-812',
-    referenceId: '12345',
-  };
-
-  console.log(
-    `Starting transfer from account ${details.sourceAccount} to account ${details.targetAccount} for $${details.amount}`
-  );
-
-  const handle = await client.start(moneyTransfer, {
-    args: [details],
+  const handle = await client.start(example, {
+    args: ['Temporal'],
     taskQueue: taskQueueName,
-    workflowId: 'pay-invoice-801',
+    workflowId: 'hello-world-' + nanoid(),
   });
 
-  console.log(
-    `Started Workflow ${handle.workflowId} with RunID ${handle.firstExecutionRunId}`
-  );
+  console.log(`Started workflow ${handle.workflowId}`);
   console.log(await handle.result());
 }
 
@@ -66,4 +51,3 @@ run().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-// @@@SNIPEND
